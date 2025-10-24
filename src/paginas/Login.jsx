@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, UserPlus, Mail, Lock, User, ArrowLeft } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexto/AuthContext';
+import Input from '@/componentes/ui/Input';
+import Button from '@/componentes/ui/Button';
+import { Card, CardHeader, CardContent, CardFooter } from '@/componentes/ui/Card';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, register, isAuthenticated } = useAuth();
-  const [modo, setModo] = useState('login'); // 'login' o 'register'
+  const [activeTab, setActiveTab] = useState('login');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -32,226 +36,189 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    let result;
-    if (modo === 'login') {
-      result = await login(formData.email, formData.password);
-    } else {
-      result = await register(
-        formData.name,
-        formData.email,
-        formData.password,
-        formData.password_confirmation
-      );
-    }
+    try {
+      let result;
+      if (activeTab === 'login') {
+        result = await login(formData.email, formData.password);
+      } else {
+        // Validar contraseñas
+        if (formData.password !== formData.password_confirmation) {
+          setError('Las contraseñas no coinciden');
+          setLoading(false);
+          return;
+        }
+        result = await register(
+          formData.name,
+          formData.email,
+          formData.password,
+          formData.password_confirmation
+        );
+      }
 
-    setLoading(false);
-
-    if (result.success) {
-      navigate('/');
+      if (result.success) {
+        navigate('/');
+      } else {
+        setError(result.message || 'Error al procesar la solicitud');
+      }
+    } catch (err) {
+      setError('Error de conexión. Verifica que el backend esté activo.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const switchTab = (tab) => {
+    setActiveTab(tab);
+    setError('');
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      password_confirmation: '',
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 relative flex items-center justify-center p-8">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center p-4">
       
       {/* Botón volver */}
       <Link
         to="/"
-        className="absolute top-8 left-8 z-20 flex items-center gap-2 text-slate-600 hover:text-purple-600 transition"
+        className="absolute top-4 left-4 flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <ArrowLeft className="w-4 h-4" />
         Volver
       </Link>
 
-      {/* Tarjeta de Login/Register */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+      {/* Card compacto */}
+      <div className="w-full max-w-sm">
+        <Card>
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-8 text-white text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 flex items-center justify-center">
-              {modo === 'login' ? (
-                <LogIn className="w-8 h-8" />
-              ) : (
-                <UserPlus className="w-8 h-8" />
-              )}
-            </div>
-            <h1 className="text-3xl font-bold mb-2">
-              {modo === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
+          <CardHeader className="bg-slate-900 dark:bg-slate-950 text-center">
+            <h1 className="text-2xl font-bold text-white mb-1">
+              PDFMaster Pro
             </h1>
-            <p className="text-purple-100">
-              {modo === 'login'
-                ? 'Accede a conversiones ilimitadas'
-                : 'Regístrate y convierte sin límites'}
+            <p className="text-sm text-slate-400">
+              Sistema de autenticación
             </p>
+          </CardHeader>
+
+          {/* Tabs compactos */}
+          <div className="flex border-b border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => switchTab('login')}
+              className={`flex-1 py-3 text-sm font-semibold transition ${
+                activeTab === 'login'
+                  ? 'text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              onClick={() => switchTab('register')}
+              className={`flex-1 py-3 text-sm font-semibold transition ${
+                activeTab === 'register'
+                  ? 'text-slate-900 dark:text-white border-b-2 border-slate-900 dark:border-white'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
+            >
+              Registrarse
+            </button>
           </div>
 
           {/* Formulario */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            
-            {/* Nombre (solo en registro) */}
-            {modo === 'register' && (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Nombre completo
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                    placeholder="Tu nombre"
-                  />
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              
+              {/* Mensaje de error */}
+              {error && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                 </div>
-              </div>
-            )}
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Correo electrónico
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                  placeholder="tu@email.com"
-                />
-              </div>
-            </div>
-
-            {/* Contraseña */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Contraseña
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  minLength={8}
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                  placeholder="••••••••"
-                />
-              </div>
-              {modo === 'register' && (
-                <p className="text-xs text-slate-500 mt-1">
-                  Mínimo 8 caracteres
-                </p>
               )}
-            </div>
 
-            {/* Confirmar contraseña (solo en registro) */}
-            {modo === 'register' && (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Confirmar contraseña
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="password"
-                    name="password_confirmation"
-                    value={formData.password_confirmation}
-                    onChange={handleChange}
-                    required
-                    minLength={8}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-            )}
+              {/* Nombre (solo en registro) */}
+              {activeTab === 'register' && (
+                <Input
+                  label="Nombre completo"
+                  type="text"
+                  name="name"
+                  icon={User}
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  required
+                />
+              )}
 
-            {/* Botón submit */}
-              <button
+              {/* Email */}
+              <Input
+                label="Correo electrónico"
+                type="email"
+                name="email"
+                icon={Mail}
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="tu@email.com"
+                required
+              />
+
+              {/* Contraseña */}
+              <Input
+                label="Contraseña"
+                type="password"
+                name="password"
+                icon={Lock}
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                minLength={8}
+                required
+              />
+
+              {/* Confirmar contraseña (solo en registro) */}
+              {activeTab === 'register' && (
+                <Input
+                  label="Confirmar contraseña"
+                  type="password"
+                  name="password_confirmation"
+                  icon={Lock}
+                  value={formData.password_confirmation}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  minLength={8}
+                  required
+                />
+              )}
+
+              {/* Botón submit */}
+              <Button
                 type="submit"
-                disabled={loading}
-                className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                variant="primary"
+                size="lg"
+                loading={loading}
+                icon={activeTab === 'login' ? LogIn : UserPlus}
+                className="w-full mt-2"
               >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    {modo === 'login' ? (
-                      <>
-                        <LogIn className="w-5 h-5" />
-                        Iniciar Sesión
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="w-5 h-5" />
-                        Crear Cuenta
-                      </>
-                    )}
-                  </>
-                )}
-              </button>
-
-            {/* Cambiar modo */}
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setModo(modo === 'login' ? 'register' : 'login');
-                  setFormData({
-                    name: '',
-                    email: '',
-                    password: '',
-                    password_confirmation: '',
-                  });
-                }}
-                className="text-purple-600 hover:text-purple-700 font-medium transition"
-              >
-                {modo === 'login'
-                  ? '¿No tienes cuenta? Regístrate'
-                  : '¿Ya tienes cuenta? Inicia sesión'}
-              </button>
-            </div>
+                {activeTab === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
+              </Button>
+            </CardContent>
           </form>
 
-          {/* Footer con beneficios */}
-          <div className="bg-slate-50 p-6 border-t border-slate-200">
-            <p className="text-sm text-slate-600 text-center mb-3 font-semibold">
-              ✨ Beneficios de crear una cuenta:
+          {/* Footer */}
+          <CardFooter>
+            <p className="text-xs text-center text-slate-600 dark:text-slate-400 w-full">
+              {activeTab === 'login' 
+                ? 'Al iniciar sesión, accedes a funciones ilimitadas'
+                : 'Al registrarte, aceptas nuestros términos de servicio'}
             </p>
-            <ul className="space-y-2 text-sm text-slate-600">
-              <li className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                Conversiones ilimitadas
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                Historial de documentos
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                Acceso desde cualquier dispositivo
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                Soporte prioritario
-              </li>
-            </ul>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );

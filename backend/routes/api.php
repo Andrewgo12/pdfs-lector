@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// Health check (sin autenticación)
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'service' => 'PDFMaster Pro API',
+        'timestamp' => now()->toIso8601String(),
+        'version' => '1.0.0',
+    ]);
+});
+
 // Rutas públicas (sin autenticación)
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);

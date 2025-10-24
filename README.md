@@ -2,13 +2,13 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.0-blue)
-![Status](https://img.shields.io/badge/status-production--ready-green)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Status](https://img.shields.io/badge/status-stable-green)
 ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)
 ![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?logo=laravel)
-![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python)
+![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite)
 
-**Sistema multi-stack de nivel empresarial para procesamiento avanzado de documentos PDF**
+**Sistema completo para procesamiento, análisis y gestión de documentos PDF**
 
 [Características](#-características) • [Instalación](#-instalación-rápida) • [Arquitectura](#-arquitectura) • [Documentación](#-documentación)
 
@@ -18,11 +18,12 @@
 
 ## 🎯 ¿Qué es PDFMaster Pro?
 
-PDFMaster Pro es una **plataforma completa y robusta** para procesar, extraer, editar y convertir documentos PDF. Combina lo mejor de tres ecosistemas tecnológicos:
+PDFMaster Pro es una **aplicación web completa** para procesar, analizar y gestionar documentos PDF. Combina un frontend moderno con un backend robusto:
 
-- 🎨 **React + Vite** - Frontend moderno con 42 efectos visuales
-- 🚀 **Laravel 11** - Backend empresarial con Sanctum
-- 🐍 **Python** - Procesamiento avanzado con 15+ librerías especializadas
+- 🎨 **React 18 + Vite** - Interface moderna y responsive
+- 🚀 **Laravel 11** - API RESTful con autenticación Sanctum
+- 💾 **SQLite** - Base de datos sin configuración
+- 🔐 **Sistema de usuarios** - Registro, login, historial personal
 
 ### 💎 Características Principales
 
@@ -31,10 +32,11 @@ PDFMaster Pro es una **plataforma completa y robusta** para procesar, extraer, e
 <td width="50%">
 
 #### 📥 Extracción Inteligente
-- ✅ 3 métodos de extracción (elige el mejor)
-- ✅ Texto, imágenes, tablas, metadatos
-- ✅ PDFs simples y complejos
-- ✅ PDFs escaneados (OCR)
+- ✅ Extracción de texto completo
+- ✅ Detección de metadatos (autor, fecha, etc.)
+- ✅ Análisis de estructura (títulos, párrafos)
+- ✅ Detección de tablas e imágenes
+- ⚠️ OCR (frontend listo, backend pendiente)
 
 #### 🔄 Procesamiento Robusto
 - ✅ Sistema de reintentos automático
@@ -54,8 +56,9 @@ PDFMaster Pro es una **plataforma completa y robusta** para procesar, extraer, e
 #### 💾 Export Múltiple
 - ✅ DOCX (Microsoft Word)
 - ✅ TXT (Texto plano)
-- ✅ JSON (Estructurado)
-- ✅ PDF firmado digitalmente
+- ✅ Markdown (con formato)
+- ✅ CSV/Excel (análisis estructurado)
+- ⚠️ PDF firmado (simulado, no real)
 
 </td>
 </tr>
@@ -69,8 +72,8 @@ PDFMaster Pro es una **plataforma completa y robusta** para procesar, extraer, e
 
 - Node.js 18+ ([Descargar](https://nodejs.org/))
 - PHP 8.2+ ([Descargar](https://www.php.net/downloads))
-- Python 3.8+ (Opcional) ([Descargar](https://www.python.org/downloads/))
 - Composer ([Descargar](https://getcomposer.org/))
+- Extensión PHP sqlite3 habilitada
 
 ### Paso 1: Clonar e Instalar
 
@@ -116,13 +119,16 @@ php artisan serve
 # → http://localhost:8000
 ```
 
-### Paso 4 (Opcional): Python Avanzado
+### Paso 4: Verificar Instalación
 
 ```bash
-cd functions/Python
-install.bat
-# o manualmente:
-pip install -r requirements.txt
+# Verificar backend
+cd backend
+php test-almacenamiento.php
+
+# Visitar aplicación
+# Frontend: http://localhost:5173
+# Backend: http://localhost:8000
 ```
 
 ---
@@ -170,31 +176,32 @@ pip install -r requirements.txt
 ```
 ┌─────────────────────────────────────────────────────┐
 │                    FRONTEND                          │
-│              React + Vite + TailwindCSS             │
-│                  http://localhost:5173              │
+│         React 18 + Vite + TailwindCSS               │
+│              http://localhost:5173                   │
 └──────────────────┬──────────────────────────────────┘
-                   │ API Requests
+                   │ API REST (JSON)
                    ▼
 ┌─────────────────────────────────────────────────────┐
-│                 BACKEND (Laravel)                    │
-│            PHP + Sanctum + SQLite                    │
-│              http://localhost:8000                   │
-├──────────────────┬──────────────────────────────────┤
-│  PHP Processing  │     Python Processing (Opt)       │
-│   smalot/pdf     │  PyPDF2, pdfplumber, PyMuPDF     │
-│   Fast & Simple  │   Advanced & Powerful             │
-└──────────────────┴──────────────────────────────────┘
+│               BACKEND (Laravel 11)                   │
+│         PHP 8.2 + Sanctum + SQLite                   │
+│            http://localhost:8000/api                 │
+├─────────────────────────────────────────────────────┤
+│  • Extracción: Smalot/PdfParser                     │
+│  • Auth: Laravel Sanctum                             │
+│  • BD: SQLite (documentos + extracciones)            │
+│  • Export: DOCX, TXT, MD, CSV                        │
+└─────────────────────────────────────────────────────┘
 ```
 
 ### Stack Tecnológico
 
 | Capa | Tecnologías |
 |------|-------------|
-| **Frontend** | React 18, Vite 7, TailwindCSS 3, Framer Motion |
-| **Backend Principal** | Laravel 11, Sanctum 4, SQLite |
-| **Backend Alternativo** | Express 5, Multer, pdf-lib |
-| **Procesamiento Avanzado** | Python 3.8+, 15 librerías especializadas |
-| **UI Components** | 42 efectos visuales custom, Lucide Icons |
+| **Frontend** | React 18.3, Vite 6, TailwindCSS 3.4, React Router 7 |
+| **Backend** | Laravel 11, Sanctum 4, SQLite 3 |
+| **PDF Processing** | Smalot/PdfParser, PhpSpreadsheet |
+| **Export** | Docx.js (frontend), PhpOffice/PhpWord (backend) |
+| **UI Components** | Lucide Icons, React Hot Toast |
 
 ---
 
@@ -202,12 +209,11 @@ pip install -r requirements.txt
 
 | Documento | Descripción |
 |-----------|-------------|
-| [ARQUITECTURA_COMPLETA.md](ARQUITECTURA_COMPLETA.md) | 📐 Arquitectura detallada del sistema |
-| [MEJORAS_EMPRESARIALES.md](MEJORAS_EMPRESARIALES.md) | 🚀 Mejoras de nivel empresarial v2.0 |
-| [PYTHON_SETUP.md](PYTHON_SETUP.md) | 🐍 Configuración del sistema Python |
+| [ESTADO_PROYECTO.md](ESTADO_PROYECTO.md) | 📊 Estado actual y funcionalidades |
+| [ALMACENAMIENTO_BD.md](ALMACENAMIENTO_BD.md) | 🗄️ Sistema de almacenamiento y BD |
+| [GUIA_ALMACENAMIENTO.md](GUIA_ALMACENAMIENTO.md) | 📘 Guía de usuario para historial |
+| [ARQUITECTURA_COMPLETA.md](ARQUITECTURA_COMPLETA.md) | 📐 Arquitectura técnica del sistema |
 | [INSTRUCCIONES_REINICIAR.md](INSTRUCCIONES_REINICIAR.md) | 🔄 Cómo reiniciar los servidores |
-| [ERRORES_CORREGIDOS.md](ERRORES_CORREGIDOS.md) | 🔧 Historial de correcciones |
-| [functions/Python/README.md](functions/Python/README.md) | 📚 Documentación del procesador Python |
 
 ---
 
@@ -249,24 +255,22 @@ python functions/Python/pdf_processor.py documento.pdf extract
 
 ---
 
-## 🎨 Efectos Visuales Incluidos
+## ✨ Características Destacadas
 
-El sistema incluye **42 componentes visuales** profesionales:
+### **Análisis Inteligente**
+- 🎯 **Detección automática de tema**: 7 categorías (tecnología, médico, legal, etc.)
+- 📝 **Extracción de objetivos**: Identifica propósitos del documento
+- 🔬 **Detección de metodología**: Encuentra secciones metodológicas
+- 💡 **Conclusiones**: Extrae conclusiones automáticamente
+- 🔑 **Palabras clave**: Genera keywords relevantes
+- 📚 **Referencias**: Detecta bibliografía y citas
 
-### Texto (8 componentes)
-`GradientText` • `GlitchText` • `BlurText` • `ScrambledText` • `RotatingText` • `ScrollReveal` • `ShinyText` • `FallingText`
-
-### Fondos (6 componentes)
-`Aurora` • `DotGrid` • `Waves` • `Particles` • `Beams` • `Lightning`
-
-### Tarjetas (3 componentes)
-`SpotlightCard` • `TiltedCard` • `GlassCard`
-
-### Interacciones (3 componentes)
-`ClickSpark` • `Magnet` • `BlobCursor`
-
-### Listas (2 componentes)
-`AnimatedList` • `ScrollStack`
+### **Gestión de Documentos**
+- 📂 **Historial completo**: Ve todos tus PDFs procesados
+- 🔍 **Búsqueda en tiempo real**: Encuentra documentos al instante
+- 📊 **Estadísticas**: Total de docs, páginas, espacio usado
+- 🔄 **Deduplicación**: Mismo PDF = resultado en caché
+- 🗑️ **Eliminar documentos**: Borra archivos y registros
 
 ---
 
@@ -274,37 +278,42 @@ El sistema incluye **42 componentes visuales** profesionales:
 
 | Característica | Soporte |
 |----------------|---------|
-| **Tipos de PDF** | Simples, Complejos, Escaneados |
+| **Tipos de PDF** | Simples y complejos |
 | **Tamaño Máximo** | 100 MB |
-| **Páginas Máximas** | 500 |
-| **Idiomas OCR** | Español, Inglés, +10 más |
-| **Formatos Export** | DOCX, TXT, JSON, PDF |
-| **Autenticación** | Sanctum tokens |
-| **Base de Datos** | SQLite (sin config) |
+| **Páginas Máximas** | Ilimitado (recomendado <500) |
+| **Formatos Export** | DOCX, TXT, MD, CSV/Excel |
+| **Autenticación** | Sanctum tokens (Bearer) |
+| **Base de Datos** | SQLite (documentos + extracciones) |
+| **Rate Limiting** | 10 PDFs/hora por usuario |
+| **Almacenamiento** | Automático con limpieza |
 
 ---
 
 ## 🔒 Seguridad
 
-- ✅ Validación de archivos (tipo MIME, tamaño)
+- ✅ Validación de archivos (tipo MIME, tamaño, extensión)
 - ✅ Hashing de contraseñas (bcrypt)
 - ✅ Tokens de autenticación (Sanctum)
-- ✅ CORS configurado
-- ✅ Hash de archivos (SHA-256)
-- ✅ Sanitización de inputs
-- ✅ HTTPS ready
+- ✅ CORS configurado correctamente
+- ✅ Hash de archivos SHA-256 (deduplicación)
+- ✅ Rate limiting (10 PDFs/hora)
+- ✅ Aislamiento de datos por usuario
+- ✅ Health check endpoint
+- ✅ Detección de backend caído
+- ✅ Gestión automática de sesión expirada
 
 ---
 
 ## 📈 Performance
 
-| Operación | PDF 10 páginas | PDF 100 páginas | PDF 500 páginas |
-|-----------|----------------|-----------------|-----------------|
-| **Validación** | < 0.1s | < 0.1s | < 0.2s |
-| **Extracción PHP** | 0.5-2s | 5-8s | 20-30s |
-| **Extracción Python** | 1-3s | 10-15s | 50-80s |
-| **OCR** | 20-30s | 200-300s | 1000-1500s |
-| **Export DOCX** | 0.5-1s | 2-3s | 10-15s |
+| Operación | PDF 10 páginas | PDF 100 páginas | Nota |
+|-----------|----------------|-----------------|------|
+| **Subida** | < 1s | < 3s | Depende de red |
+| **Extracción** | 1-3s | 5-10s | Smalot/PdfParser |
+| **Análisis** | < 0.5s | < 1s | En frontend |
+| **Export DOCX** | 1-2s | 3-5s | PhpOffice |
+| **Export CSV** | < 0.5s | < 1s | En frontend |
+| **Cache (duplicado)** | < 0.1s | < 0.1s | Instantáneo |
 
 ---
 
@@ -373,23 +382,26 @@ php artisan view:cache
 
 ## 📋 Roadmap
 
-### v2.1 (Próximo)
+### v1.1 (Próximas 2 semanas)
+- [ ] OCR completo (Tesseract.js)
+- [ ] Firma digital real (no simulada)
+- [ ] Modo oscuro
+- [ ] Responsive mobile mejorado
+- [ ] Loading states avanzados
+
+### v1.2 (Próximo mes)
+- [ ] Búsqueda full-text (contenido)
+- [ ] Compartir documentos
+- [ ] Notificaciones push
 - [ ] Tests automatizados
-- [ ] CI/CD pipeline
 - [ ] Docker compose
-- [ ] Documentación API (Swagger)
 
-### v2.2
-- [ ] Dashboard admin
-- [ ] Planes de suscripción (Stripe)
-- [ ] API pública
-- [ ] Rate limiting
-
-### v3.0
-- [ ] Machine Learning (clasificación)
-- [ ] Procesamiento por lotes
-- [ ] Cloud storage (S3, Google Drive)
-- [ ] Mobile app (React Native)
+### v2.0 (2-3 meses)
+- [ ] Versionado de documentos
+- [ ] API pública con documentación
+- [ ] Cloud storage (S3)
+- [ ] Analytics y métricas
+- [ ] CI/CD pipeline
 
 ---
 
@@ -431,14 +443,14 @@ Este proyecto es privado y de uso empresarial.
 ## 📊 Estadísticas del Proyecto
 
 ```
-📁 Total de Archivos:        140+
-📝 Líneas de Código:         ~16,650
-⚛️ Componentes React:        60+
-🎨 Efectos Visuales:         42
-🔌 Rutas API:                15+
-🐍 Librerías Python:         15
-✨ Funcionalidades:          30+
-⭐ Nivel de Calidad:         Empresarial
+📁 Total de Archivos:        87
+📝 Líneas de Código:         ~15,000
+⚛️ Componentes React:        12
+🔌 Endpoints API:            18
+💾 Tablas BD:                2 (documentos, extracciones)
+✨ Funcionalidades Core:     25+
+⭐ Estado:                   Estable y productivo
+🔒 Seguridad:                Rate limiting + Auth
 ```
 
 ---

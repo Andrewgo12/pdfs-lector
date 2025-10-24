@@ -4,12 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\Documento;
 use App\Models\Extraccion;
+use App\Services\DocumentoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class PDFController extends Controller
 {
+    protected $documentoService;
+    
+    public function __construct(DocumentoService $documentoService)
+    {
+        $this->documentoService = $documentoService;
+    }
     /**
      * Limpiar texto de caracteres UTF-8 inválidos
      */
@@ -289,10 +296,24 @@ class PDFController extends Controller
      */
     public function historial(Request $request)
     {
-        $documentos = Documento::with('ultimaExtraccion')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->paginate(20);
+        $pagina = $request->input('page', 1);
+        $porPagina = $request->input('per_page', 20);
+        $termino = $request->input('search');
+        
+        if ($termino) {
+            $documentos = $this->documentoService->buscarDocumentos(
+                auth()->id(), 
+                $termino, 
+                $pagina, 
+                $porPagina
+            );
+        } else {
+            $documentos = $this->documentoService->obtenerHistorial(
+                auth()->id(), 
+                $pagina, 
+                $porPagina
+            );
+        }
 
         return response()->json($documentos);
     }
@@ -302,12 +323,15 @@ class PDFController extends Controller
      */
     public function show($id)
     {
-        $documento = Documento::with('extracciones')
-            ->where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-
-        return response()->json($documento);
+        try {
+            $documento = $this->documentoService->obtenerDocumentoCompleto($id, auth()->id());
+            return response()->json($documento);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Documento no encontrado o sin acceso'
+            ], 404);
+        }
     }
 
     /**
@@ -315,19 +339,19 @@ class PDFController extends Controller
      */
     public function destroy($id)
     {
-        $documento = Documento::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
-
-        // Eliminar archivo físico
-        if ($documento->ruta_archivo && Storage::disk('public')->exists($documento->ruta_archivo)) {
-            Storage::disk('public')->delete($documento->ruta_archivo);
+        try {
+            $this->documentoService->eliminarDocumento($id, auth()->id());
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Documento eliminado correctamente'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 403);
         }
-
-        // Eliminar de BD (cascade eliminará extracciones)
-        $documento->delete();
-
-        return response()->json(['success' => true, 'message' => 'Documento eliminado']);
     }
 
     /**
@@ -368,19 +392,7 @@ class PDFController extends Controller
      */
     public function stats()
     {
-        $userId = auth()->id();
-
-        $stats = [
-            'total_documentos' => Documento::where('user_id', $userId)->count(),
-            'total_paginas' => Documento::where('user_id', $userId)->sum('num_paginas'),
-            'total_extracciones' => Extraccion::whereHas('documento', function($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })->count(),
-            'tiempo_total' => Extraccion::whereHas('documento', function($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })->sum('tiempo_procesamiento'),
-        ];
-
+        $stats = $this->documentoService->obtenerEstadisticas(auth()->id());
         return response()->json($stats);
     }
 

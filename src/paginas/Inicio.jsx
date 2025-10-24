@@ -56,7 +56,7 @@ export default function Inicio() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-8 relative">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-8 relative">
       <Navigation />
       
       {/* Header */}
@@ -70,7 +70,7 @@ export default function Inicio() {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 PDFMaster Pro
               </h1>
-              <p className="text-slate-600">Procesamiento Avanzado de PDFs</p>
+              <p className="text-slate-600 dark:text-slate-400">Procesamiento Avanzado de PDFs</p>
             </div>
           </div>
 
@@ -78,13 +78,13 @@ export default function Inicio() {
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-xl">
-                  <User className="w-5 h-5 text-purple-600" />
-                  <span className="text-sm font-medium text-slate-700">{user?.name}</span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
+                  <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{user?.name}</span>
                 </div>
                 <button
                   onClick={logout}
-                  className="px-4 py-2 text-slate-600 hover:text-red-600 transition"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition"
                 >
                   Salir
                 </button>
@@ -148,8 +148,8 @@ export default function Inicio() {
             onDrop={manejarSoltar}
             className={`border-2 border-dashed rounded-2xl p-20 text-center transition-all cursor-pointer ${
               arrastrando
-                ? 'border-purple-500 bg-purple-50 scale-105'
-                : 'border-slate-300 bg-white hover:border-purple-400'
+                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 scale-105'
+                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-purple-400 dark:hover:border-purple-500'
             }`}
             onClick={() => inputRef.current?.click()}
           >
@@ -162,13 +162,13 @@ export default function Inicio() {
             />
 
             <div className="flex flex-col items-center gap-4">
-              <div className="p-6 rounded-full bg-purple-100">
+              <div className="p-6 rounded-full bg-purple-100 dark:bg-purple-900/30">
                 <FileUp className="w-16 h-16 text-purple-600" />
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
                 Sube tu PDF
               </h2>
-              <p className="text-slate-600 max-w-md">
+              <p className="text-slate-600 dark:text-slate-400 max-w-md">
                 Arrastra y suelta tu archivo PDF aquí, o haz clic para seleccionar
               </p>
               <p className="text-sm text-slate-500">
@@ -180,38 +180,38 @@ export default function Inicio() {
           /* Previsualización del PDF */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Panel izquierdo - Visor PDF (2/3) */}
-            <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl overflow-hidden" style={{ height: '700px' }}>
+            <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden" style={{ height: '700px' }}>
               <VisorPDF archivo={archivo} />
             </div>
 
             {/* Panel derecho - Información y acciones (1/3) */}
             <div className="space-y-6">
               {/* Información del archivo */}
-              <div className="bg-white rounded-2xl p-6 shadow-lg">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-800 mb-2 break-words">
+                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2 break-words">
                       {archivo.name}
                     </h3>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       Tamaño: {(archivo.size / (1024 * 1024)).toFixed(2)} MB
                     </p>
                   </div>
                   <button
                     onClick={() => setArchivo(null)}
-                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                    className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition"
                     title="Eliminar archivo"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="space-y-3 py-4 border-t border-slate-200">
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                <div className="space-y-3 py-4 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
                     <span>PDF cargado correctamente</span>
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Revisa la vista previa y presiona "Extraer" para comenzar el procesamiento.
                   </p>
                 </div>
@@ -227,11 +227,11 @@ export default function Inicio() {
               </button>
 
               {/* Info adicional */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h4 className="font-semibold text-blue-900 mb-2 text-sm">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2 text-sm">
                   ¿Qué se extraerá?
                 </h4>
-                <ul className="text-xs text-blue-800 space-y-1">
+                <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
                   <li>✓ Texto completo del documento</li>
                   <li>✓ Metadatos (autor, título, fecha)</li>
                   <li>✓ Imágenes detectadas</li>

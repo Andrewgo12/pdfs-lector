@@ -12,6 +12,9 @@ export default function Historial() {
   const [documentos, setDocumentos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [estadisticas, setEstadisticas] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -22,12 +25,18 @@ export default function Historial() {
     cargarHistorial();
   }, [isAuthenticated, navigate]);
 
-  const cargarHistorial = async () => {
+  const cargarHistorial = async (pagina = 1, termino = '') => {
     try {
       setCargando(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch('http://localhost:8000/api/pdf/historial', {
+      const params = new URLSearchParams({
+        page: pagina,
+        per_page: 20,
+        ...(termino && { search: termino }),
+      });
+      
+      const response = await fetch(`http://localhost:8000/api/pdf/historial?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',
@@ -40,8 +49,12 @@ export default function Historial() {
 
       const data = await response.json();
       
+      // Actualizar paginación
+      setPaginaActual(data.current_page || 1);
+      setTotalPaginas(data.last_page || 1);
+      
       // Transformar datos del backend al formato esperado
-      const documentosFormateados = (data.documentos || []).map(doc => ({
+      const documentosFormateados = (data.data || []).map(doc => ({
         id: doc.id,
         nombre: doc.nombre_original || doc.nombre,
         fecha: new Date(doc.created_at).toISOString().split('T')[0],
@@ -56,6 +69,9 @@ export default function Historial() {
       }));
 
       setDocumentos(documentosFormateados);
+      
+      // Cargar estadísticas
+      cargarEstadisticas();
     } catch (error) {
       console.error('Error cargando historial:', error);
       toast.error('Error al cargar el historial');
@@ -64,10 +80,36 @@ export default function Historial() {
       setCargando(false);
     }
   };
+  
+  const cargarEstadisticas = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8000/api/pdf/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setEstadisticas(data);
+      }
+    } catch (error) {
+      console.error('Error cargando estadísticas:', error);
+    }
+  };
 
-  const documentosFiltrados = documentos.filter(doc =>
-    doc.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  // Buscar con debounce
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    const timer = setTimeout(() => {
+      cargarHistorial(1, busqueda);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [busqueda, isAuthenticated]);
 
   const eliminarDocumento = async (id) => {
     if (!confirm('¿Eliminar este documento?')) {
@@ -132,7 +174,7 @@ export default function Historial() {
               <Loader2 className="w-16 h-16 text-purple-600 mx-auto mb-4 animate-spin" />
               <p className="text-slate-600">Cargando documentos...</p>
             </div>
-          ) : documentosFiltrados.length === 0 ? (
+          ) : documentos.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
               <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-500">
@@ -142,7 +184,7 @@ export default function Historial() {
               </p>
             </div>
           ) : (
-            documentosFiltrados.map((doc, index) => (
+            documentos.map((doc, index) => (
               <div key={doc.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -216,25 +258,52 @@ export default function Historial() {
           )}
         </div>
 
+        {/* Paginación */}
+        {totalPaginas > 1 && (
+          <div className="mt-6 flex justify-center gap-2">
+            <button
+              onClick={() => cargarHistorial(paginaActual - 1, busqueda)}
+              disabled={paginaActual === 1}
+              className="px-4 py-2 bg-white rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50"
+            >
+              Anterior
+            </button>
+            <span className="px-4 py-2 bg-white rounded-lg shadow">
+              Página {paginaActual} de {totalPaginas}
+            </span>
+            <button
+              onClick={() => cargarHistorial(paginaActual + 1, busqueda)}
+              disabled={paginaActual === totalPaginas}
+              className="px-4 py-2 bg-white rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50"
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
+
         {/* Estadísticas */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-            <p className="text-3xl font-bold text-purple-600">{documentos.length}</p>
-            <p className="text-slate-600 mt-2">Documentos procesados</p>
+        {estadisticas && (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+              <p className="text-3xl font-bold text-purple-600">{estadisticas.total_documentos}</p>
+              <p className="text-slate-600 mt-2">Documentos</p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+              <p className="text-3xl font-bold text-pink-600">{estadisticas.total_paginas}</p>
+              <p className="text-slate-600 mt-2">Páginas</p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+              <p className="text-3xl font-bold text-blue-600">
+                {(estadisticas.total_tamano / 1024 / 1024).toFixed(2)} MB
+              </p>
+              <p className="text-slate-600 mt-2">Almacenamiento</p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+              <p className="text-3xl font-bold text-green-600">{estadisticas.total_extracciones}</p>
+              <p className="text-slate-600 mt-2">Extracciones</p>
+            </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-            <p className="text-3xl font-bold text-pink-600">
-              {documentos.reduce((sum, doc) => sum + doc.paginas, 0)}
-            </p>
-            <p className="text-slate-600 mt-2">Páginas totales</p>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
-            <p className="text-3xl font-bold text-blue-600">
-              {documentos.filter(d => d.estado === 'Completado').length}
-            </p>
-            <p className="text-slate-600 mt-2">Completados</p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
