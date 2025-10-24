@@ -1,0 +1,63 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.config/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Laravel Backend
+backend/vendor/
+backend/.env
+backend/storage/*.key
+backend/storage/app/pdfs/*
+backend/storage/app/temp/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/logs/*
+backend/bootstrap/cache/*
+backend/database/database.sqlite
+backend/database/*.sqlite
+backend/.phpunit.result.cache
+
+# Keep important directories
+!backend/storage/app/.gitkeep
+!backend/storage/app/pdfs/.gitkeep
+!backend/storage/app/temp/.gitkeep
+!backend/storage/framework/.gitkeep
+!backend/storage/logs/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+*.bak
+*.backup
+*.old
